@@ -1,0 +1,52 @@
+@startuml casos_de_uso_aluguel
+' =====================================================================
+' Sistema de Gestao de eBooks da Biblioteca Universitaria
+' Diagrama de Casos de Uso - Lab01S01
+' Fonte versionada em docs/diagramas/casos-de-uso.puml
+' Versao enxuta: 14 casos de uso
+' =====================================================================
+
+left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam usecase {
+  BackgroundColor #FDFDFD
+  BorderColor #444444
+}
+
+rectangle "Sistema de Gestão de eBooks" {
+
+  ' --- Geral ---
+  usecase "Consultar pedidos de aluguel - UC07" as UC07
+
+  ' --- Cliente ---
+  usecase "Criar pedido de aluguel - UC01" as UC01
+  usecase "Alterar pedido de aluguel - UC02" as UC02
+  usecase "Cancelar pedido de aluguel - UC03" as UC03
+  usecase "Confirmar aluguel para contrato - UC04" as UC04
+
+  ' --- Empresa ---
+  usecase "Cadastrar veículo - UC05" as UC05
+  usecase "Enviar parecer do pedido - UC06" as UC06
+}
+
+' ============================== ATORES ===============================
+actor Cliente as "Cliente"
+actor Empresa as "Empresa"
+actor Banco as "Banco"
+
+' ============================ ASSOCIACOES ============================
+Cliente --> UC01
+Cliente --> UC02
+Cliente --> UC03
+Cliente --> UC04
+Cliente --> UC07
+
+Empresa --> UC05
+Empresa --> UC06
+Empresa --> UC07
+
+Banco --> UC06
+Banco --> UC07
+
+@enduml
