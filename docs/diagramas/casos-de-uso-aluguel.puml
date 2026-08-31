@@ -31,9 +31,14 @@ rectangle "Sistema de Gestão de eBooks" {
 }
 
 ' ============================== ATORES ===============================
+actor Usuario as "Usuario"
 actor Cliente as "Cliente"
 actor Empresa as "Empresa"
 actor Banco as "Banco"
+
+Cliente <|-- Usuario
+Empresa <|-- Usuario
+Banco <|-- Usuario
 
 ' ============================ ASSOCIACOES ============================
 Cliente --> UC01
@@ -47,6 +52,7 @@ Empresa --> UC06
 Empresa --> UC07
 
 Banco --> UC06
-Banco --> UC07
+
+Usuario --> UC07
 
 @enduml
