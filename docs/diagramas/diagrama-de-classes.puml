@@ -1,0 +1,150 @@
+@startuml diagrama_de_classes
+' =====================================================================
+' Sistema de Aluguel de Automoveis
+' Diagrama de Classes - Lab02S01
+' Fonte versionada em docs/diagramas/diagrama-de-classes.puml
+' Classes derivadas das Historias de Usuario (docs/historias-de-usuario.md)
+' =====================================================================
+
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+hide circle
+
+abstract class Usuario {
+  - id: Long
+  - login: String
+  - senha: String
+  + autenticar(senha: String): boolean
+}
+
+class Cliente {
+  - rg: String
+  - cpf: String
+  - nome: String
+  - endereco: String
+  - profissao: String
+  + rendimentoTotal(): BigDecimal
+}
+
+abstract class Agente {
+  - nomeInstituicao: String
+  + analisarPedido(pedido: Pedido): void
+  + registrarParecer(pedido: Pedido, resultado: ResultadoParecer, justificativa: String): Parecer
+}
+
+class Empresa {
+  + cadastrarAutomovel(automovel: Automovel): void
+  + registrarDevolucao(contrato: Locacao, data: LocalDate): void
+}
+
+class Banco {
+  + concederCredito(leasing: Leasing, valor: BigDecimal): ContratoCredito
+}
+
+Usuario <|-- Cliente
+Usuario <|-- Agente
+Agente <|-- Empresa
+Agente <|-- Banco
+
+class EntidadeEmpregadora {
+  - nome: String
+  - rendimento: BigDecimal
+}
+
+Cliente "1" *-- "0..n" EntidadeEmpregadora : possui >
+
+class Automovel {
+  - placa: String
+  - ano: int
+  - marca: String
+  - modelo: String
+  - disponivel: boolean
+}
+
+enum ModalidadeContrato {
+  LOCACAO
+  ASSINATURA
+  LEASING
+}
+
+enum SituacaoPedido {
+  NAO_AVALIADO
+  EM_ANALISE
+  AVALIADO
+  ACEITO
+  RECUSADO
+  CANCELADO
+}
+
+class Pedido {
+  - id: Long
+  - dataCriacao: LocalDateTime
+  - dataAlteracao: LocalDateTime
+  - modalidade: ModalidadeContrato
+  - situacao: SituacaoPedido
+  + alterar(automovel: Automovel, modalidade: ModalidadeContrato): void
+  + cancelar(): void
+}
+
+enum ResultadoParecer {
+  FAVORAVEL
+  DESFAVORAVEL
+}
+
+class Parecer {
+  - resultado: ResultadoParecer
+  - justificativa: String
+  - dataHora: LocalDateTime
+}
+
+enum SituacaoContrato {
+  PENDENTE
+  EM_EXECUCAO
+  ENCERRADO
+}
+
+abstract class Contrato {
+  - id: Long
+  - dataInicio: LocalDateTime
+  - situacao: SituacaoContrato
+}
+
+class Locacao {
+  - prazo: int
+  - dataPrevistaDevolucao: LocalDate
+  - dataEfetivaDevolucao: LocalDate
+  + registrarDevolucao(data: LocalDate): void
+}
+
+class Assinatura {
+  - valorMensalidade: BigDecimal
+  - recorrencia: String
+}
+
+class Leasing {
+}
+
+class ContratoCredito {
+  - id: Long
+  - valor: BigDecimal
+  - dataConcessao: LocalDate
+}
+
+Contrato <|-- Locacao
+Contrato <|-- Assinatura
+Contrato <|-- Leasing
+
+Cliente "1" -- "*" Pedido : realiza >
+Pedido "*" -- "1" Automovel : refere-se a >
+Pedido "1" -- "0..1" Parecer : recebe >
+Agente "1" -- "*" Parecer : emite >
+Pedido "1" -- "0..1" Contrato : origina >
+
+Contrato "*" -- "1" Automovel : envolve >
+Contrato "*" -- "1" Cliente : contratante >
+Leasing "1" *-- "1" ContratoCredito : associado a >
+Banco "1" -- "*" ContratoCredito : concede >
+
+Automovel "1" -- "1" Usuario : proprietario >
+
+@enduml
