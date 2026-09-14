@@ -1,0 +1,67 @@
+@startuml diagrama_de_pacotes
+' =====================================================================
+' Sistema de Aluguel de Automoveis
+' Diagrama de Pacotes (Visao Logica) - Lab02S01
+' Fonte versionada em docs/diagramas/diagrama-de-pacotes.puml
+' Dois subsistemas (conforme enunciado): backend Spring (gestao de
+' pedidos e contratos, expondo API REST) e frontend Vue.js (construcao
+' dinamica das paginas web), que consome essa API via HTTP/JSON.
+' =====================================================================
+
+skinparam shadowing false
+skinparam packageStyle rectangle
+
+package "frontend (Vue.js)" as frontend <<subsistema: construcao dinamica das paginas web>> {
+  package "views" as feViews
+  package "components" as feComponents
+  package "router" as feRouter
+  package "store" as feStore
+  package "services" as feServices
+}
+
+package "backend (Spring Boot)" as backend <<subsistema: gestao de pedidos e contratos>> {
+  package "com.xulambs_aluguel.xulu" {
+    package "controller" as controller
+    package "dto" as dto
+    package "model" as model
+    package "service" as service
+    package "repository" as repository
+  }
+}
+
+' ============================ DEPENDENCIAS =============================
+
+feRouter ..> feViews      : navega para
+feViews ..> feComponents  : usa
+feViews ..> feStore       : le / atualiza
+feStore ..> feServices    : usa
+
+controller ..> service   : usa
+controller ..> dto       : recebe / devolve
+
+dto ..> model            : mapeia
+
+service ..> model        : opera sobre
+service ..> repository   : usa
+
+repository ..> model     : persiste
+
+feServices ..> controller : <<HTTP / JSON>>\nconsome API REST
+
+note bottom of frontend
+  SPA em Vue.js. "views" = paginas roteadas,
+  "components" = elementos reutilizaveis,
+  "store" = estado da aplicacao (Pinia/Vuex),
+  "services" = chamadas HTTP a API REST do
+  backend (HU21/RF25).
+end note
+
+note bottom of backend
+  Expoe API REST (controller/dto) e concentra
+  as regras de negocio de pedidos, avaliacao,
+  contratos e automoveis (RF01-RF24). Nao possui
+  camada de View em Java - a renderizacao das
+  paginas e responsabilidade do frontend.
+end note
+
+@enduml
