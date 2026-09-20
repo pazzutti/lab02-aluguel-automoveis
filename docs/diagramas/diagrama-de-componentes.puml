@@ -1,0 +1,162 @@
+@startuml diagrama_de_componentes
+' =====================================================================
+' Sistema de Aluguel de Automoveis - Xulambs (xulu)
+' Diagrama de Componentes
+' Fonte versionada em docs/diagramas/diagrama-de-componentes.puml
+' Arquitetura: aplicacao web Spring Boot (Web MVC + Data JPA) sobre MySQL
+' =====================================================================
+
+skinparam shadowing false
+skinparam componentStyle uml2
+skinparam linetype ortho
+skinparam ranksep 60
+skinparam nodesep 55
+skinparam defaultTextAlignment center
+skinparam component {
+  BackgroundColor #FDFDFD
+  BorderColor #444444
+}
+skinparam interface {
+  BackgroundColor #FDFDFD
+  BorderColor #444444
+}
+skinparam package {
+  BackgroundColor #F5F5F5
+  BorderColor #888888
+}
+skinparam node {
+  BackgroundColor #FFFFFF
+  BorderColor #666666
+}
+skinparam database {
+  BackgroundColor #FDFDFD
+  BorderColor #444444
+}
+
+actor "Usuário\n(Cliente / Empresa / Banco)" as Usuario
+
+node "Estação do Usuário" as Browser {
+  [Interface Web\n(Navegador)] as UI
+}
+
+node "Servidor de Aplicação (Spring Boot)" as Servidor {
+
+  package "Apresentação (Web MVC)" as Apresentacao {
+    [Filtro de Acesso\npor Perfil] as Filtro
+    [Motor de Páginas\nDinâmicas] as Templates
+
+    [Controlador de\nAutenticação] as CtrlAuth
+    [Controlador de\nUsuários] as CtrlUsuario
+    [Controlador de\nAutomóveis] as CtrlAutomovel
+    [Controlador de\nPedidos] as CtrlPedido
+    [Controlador de\nAnálise] as CtrlAnalise
+    [Controlador de\nContratos] as CtrlContrato
+  }
+
+  package "Negócio (Serviços de Domínio)" as Negocio {
+    interface "IAutenticacao" as IAuth
+    interface "ICadastro" as ICadastro
+    interface "IAutomovel" as IAutomovel
+    interface "IPedido" as IPedido
+    interface "IAvaliacao" as IAvaliacao
+    interface "IContrato" as IContrato
+
+    [Serviço de\nAutenticação] as SrvAuth
+    [Serviço de\nCadastro] as SrvCadastro
+    [Serviço de\nAutomóveis] as SrvAutomovel
+    [Serviço de\nPedidos] as SrvPedido
+    [Serviço de\nAvaliação] as SrvAvaliacao
+    [Serviço de\nContratos] as SrvContrato
+    [Serviço de\nCrédito] as SrvCredito
+    [Serviço de\nNotificação] as SrvNotificacao
+  }
+
+  package "Persistência (Repositórios JPA)" as Persistencia {
+    [Repositório de\nUsuários] as RepUsuario
+    [Repositório de\nAutomóveis] as RepAutomovel
+    [Repositório de\nPedidos] as RepPedido
+    [Repositório de\nContratos] as RepContrato
+    [Repositório de\nCrédito] as RepCredito
+    [Repositório de\nNotificações] as RepNotificacao
+  }
+}
+
+database "MySQL\n(xulambs)" as BD
+
+interface "HTTP / HTML" as IHttp
+interface "JDBC" as IJdbc
+
+' ============ ACESSO PELO NAVEGADOR (RF04 / RF25 - HU21) =============
+Usuario --> UI
+UI --( IHttp
+IHttp -- Filtro
+Filtro --> Templates : renderiza a resposta\nconforme o perfil (RF25)
+
+' ============ ROTEAMENTO DA REQUISIÇÃO AUTORIZADA (RF04) =============
+Filtro --> CtrlAuth
+Filtro --> CtrlUsuario
+Filtro --> CtrlAutomovel
+Filtro --> CtrlPedido
+Filtro --> CtrlAnalise
+Filtro --> CtrlContrato
+
+' ====== INTERFACES PROVIDAS PELOS SERVIÇOS (RF04 .. RF24) ============
+IAuth - SrvAuth
+ICadastro - SrvCadastro
+IAutomovel - SrvAutomovel
+IPedido - SrvPedido
+IAvaliacao - SrvAvaliacao
+IContrato - SrvContrato
+
+CtrlAuth --( IAuth
+CtrlUsuario --( ICadastro
+CtrlAutomovel --( IAutomovel
+CtrlPedido --( IPedido
+CtrlAnalise --( IAvaliacao
+CtrlContrato --( IContrato
+Filtro ..> IAuth : valida sessão e perfil
+
+' ==================== DEPENDÊNCIAS ENTRE SERVIÇOS ====================
+SrvAuth ..> SrvCadastro : RF04
+SrvPedido ..> SrvCadastro : RF14
+SrvPedido ..> SrvAutomovel : RF07
+SrvAvaliacao ..> SrvPedido : RF15
+SrvAvaliacao ..> SrvNotificacao : RF17
+SrvContrato ..> SrvPedido : RF18
+SrvContrato ..> SrvAutomovel : RF21
+SrvContrato ..> SrvCredito : RF20
+SrvCredito ..> SrvNotificacao : RF17
+
+' ================= NEGÓCIO -> PERSISTÊNCIA (RF01 .. RF24) ============
+SrvCadastro ..> RepUsuario
+SrvAutomovel ..> RepAutomovel
+SrvAutomovel ..> RepContrato
+SrvPedido ..> RepPedido
+SrvContrato ..> RepContrato
+SrvCredito ..> RepCredito
+SrvNotificacao ..> RepNotificacao
+
+' ======================= PERSISTÊNCIA -> BANCO =======================
+RepUsuario ..> IJdbc
+RepAutomovel ..> IJdbc
+RepPedido ..> IJdbc
+RepContrato ..> IJdbc
+RepCredito ..> IJdbc
+RepNotificacao ..> IJdbc
+
+IJdbc -- BD
+
+' ============================== LEGENDA ==============================
+legend bottom
+  **Dependências entre serviços de domínio**
+  RF04 — autenticação consulta as credenciais do usuário cadastrado
+  RF07 — pedido só usa automóvel disponível (sem contrato em execução)
+  RF14 — pedido valida o rendimento total das entidades empregadoras
+  RF15 — avaliação registra o parecer e atualiza a situação do pedido
+  RF17 — avaliação e crédito disparam a notificação ao cliente
+  RF18 — contrato é gerado a partir do pedido aceito pelo cliente
+  RF20 — contrato de leasing exige a concessão de crédito pelo banco
+  RF21 — contrato define o proprietário do automóvel na vigência
+end legend
+
+@enduml
