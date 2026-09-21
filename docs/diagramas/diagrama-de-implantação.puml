@@ -1,0 +1,66 @@
+@startuml diagrama_de_implantacao
+' =====================================================================
+' Sistema de Aluguel de Automoveis - Xulambs (xulu)
+' Diagrama de Implantacao
+' Fonte versionada em docs/diagramas/diagrama-de-implantacao.puml
+' Arquitetura: SPA Vue 3 no navegador -> API REST Spring Boot -> MySQL
+' =====================================================================
+
+skinparam shadowing false
+skinparam componentStyle uml2
+skinparam linetype ortho
+skinparam ranksep 70
+skinparam nodesep 55
+skinparam defaultTextAlignment center
+skinparam component {
+  BackgroundColor #FDFDFD
+  BorderColor #444444
+}
+skinparam node {
+  BackgroundColor #FFFFFF
+  BorderColor #666666
+}
+skinparam database {
+  BackgroundColor #FDFDFD
+  BorderColor #444444
+}
+skinparam artifact {
+  BackgroundColor #F5F5F5
+  BorderColor #888888
+}
+
+actor "Usuário\n(Cliente / Empresa / Banco)" as Usuario
+
+node "Estação do Usuário" as Estacao {
+  node "Navegador Web" as Browser {
+    artifact "Aplicação Vue 3\n(SPA servida pelo Vite)" as SPA
+  }
+}
+
+node "Servidor de Aplicação" as ServidorApp {
+  artifact "xulu.jar\n(Spring Boot / Java 21)\nporta 5000" as App
+}
+
+node "Servidor de Banco de Dados" as ServidorBD {
+  database "MySQL 8.0\nbase: xulambs\nporta 3306" as BD
+}
+
+Usuario --> Browser : utiliza
+
+Browser --> ServidorApp : **HTTP/JSON (REST)**\nrequisição / resposta
+
+ServidorApp --> ServidorBD : **JDBC**\n(mysql-connector-j)
+
+note right of ServidorApp
+  Camadas de apresentação, negócio
+  e persistência (JPA/Hibernate)
+  detalhadas no diagrama de componentes.
+end note
+
+note bottom of ServidorBD
+  Executado em container Docker
+  (docker-compose.yml), com volume
+  xulambs-mysql-data para persistência.
+end note
+
+@enduml
