@@ -1,0 +1,13 @@
+package com.xulambs_aluguel.xulu.web;
+
+import jakarta.validation.constraints.NotBlank;
+
+/**
+ * Corpo JSON esperado no cadastro de um banco (POST /api/bancos).
+ */
+public record BancoRequest(
+        @NotBlank(message = "Nome da instituicao e obrigatorio") String nomeInstituicao,
+        @NotBlank(message = "Login e obrigatorio") String login,
+        @NotBlank(message = "Senha e obrigatoria") String senha
+) {
+}
