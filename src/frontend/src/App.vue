@@ -18,7 +18,11 @@ async function sairEVoltar() {
     <RouterLink class="titulo" to="/">Xulambs Aluguel de Automóveis</RouterLink>
 
     <nav>
-      <RouterLink v-if="authStore.usuario?.tipo === 'CLIENTE'" to="/perfil">Meu perfil</RouterLink>
+      <template v-if="authStore.usuario?.tipo === 'CLIENTE'">
+        <RouterLink to="/pedidos">Meus pedidos</RouterLink>
+        <RouterLink to="/perfil">Meu perfil</RouterLink>
+      </template>
+      <RouterLink v-else-if="authStore.usuario" to="/pedidos">Pedidos pendentes</RouterLink>
 
       <template v-if="authStore.usuario">
         <button type="button" class="link" @click="sairEVoltar">Sair</button>

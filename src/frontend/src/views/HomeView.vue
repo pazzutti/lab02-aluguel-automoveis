@@ -12,11 +12,16 @@ import { authStore } from '@/store/auth'
       Sistema de gestão de aluguéis de automóveis. Crie uma conta ou entre para continuar.
     </p>
     <p v-if="authStore.usuario && authStore.usuario.tipo !== 'CLIENTE'">
-      Ainda não há nada por aqui para contas do tipo {{ authStore.usuario.tipo.toLowerCase() }}.
+      Acompanhe os pedidos de aluguel que aguardam análise.
     </p>
 
     <div class="acoes" v-if="authStore.usuario?.tipo === 'CLIENTE'">
-      <RouterLink class="botao" to="/perfil">Meu perfil</RouterLink>
+      <RouterLink class="botao" to="/pedidos/novo">Novo pedido</RouterLink>
+      <RouterLink class="botao secundario" to="/pedidos">Meus pedidos</RouterLink>
+      <RouterLink class="botao secundario" to="/perfil">Meu perfil</RouterLink>
+    </div>
+    <div class="acoes" v-else-if="authStore.usuario">
+      <RouterLink class="botao" to="/pedidos">Pedidos pendentes</RouterLink>
     </div>
     <div class="acoes" v-else-if="!authStore.usuario">
       <RouterLink class="botao" to="/registrar">Criar conta</RouterLink>
@@ -40,6 +45,7 @@ import { authStore } from '@/store/auth'
 
 .acoes {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.75rem;
   justify-content: center;
   margin-top: 2rem;
