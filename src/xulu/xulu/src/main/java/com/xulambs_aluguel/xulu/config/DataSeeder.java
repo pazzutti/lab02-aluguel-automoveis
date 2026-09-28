@@ -1,8 +1,10 @@
 package com.xulambs_aluguel.xulu.config;
 
+import com.xulambs_aluguel.xulu.model.Automovel;
 import com.xulambs_aluguel.xulu.model.Banco;
 import com.xulambs_aluguel.xulu.model.Cliente;
 import com.xulambs_aluguel.xulu.model.Empresa;
+import com.xulambs_aluguel.xulu.repository.AutomovelRepository;
 import com.xulambs_aluguel.xulu.repository.UsuarioRepository;
 import com.xulambs_aluguel.xulu.service.AgenteService;
 import com.xulambs_aluguel.xulu.service.ClienteService;
@@ -25,12 +27,14 @@ public class DataSeeder implements CommandLineRunner {
     private final UsuarioRepository usuarioRepository;
     private final ClienteService clienteService;
     private final AgenteService agenteService;
+    private final AutomovelRepository automovelRepository;
 
     public DataSeeder(UsuarioRepository usuarioRepository, ClienteService clienteService,
-                       AgenteService agenteService) {
+                       AgenteService agenteService, AutomovelRepository automovelRepository) {
         this.usuarioRepository = usuarioRepository;
         this.clienteService = clienteService;
         this.agenteService = agenteService;
+        this.automovelRepository = automovelRepository;
     }
 
     @Override
@@ -48,5 +52,24 @@ public class DataSeeder implements CommandLineRunner {
             agenteService.cadastrarBanco(new Banco("Banco Exemplo S.A.", "Banco", SENHA_PADRAO));
             log.info("Conta de exemplo criada: login=Banco senha={}", SENHA_PADRAO);
         }
+        seedAutomoveis();
+    }
+
+    /**
+     * Cadastro de automovel (Empresa.cadastrarAutomovel) ainda nao tem
+     * endpoint proprio, entao a frota de demonstracao vem daqui, pertencendo
+     * a Empresa Exemplo.
+     */
+    private void seedAutomoveis() {
+        if (automovelRepository.count() > 0) {
+            return;
+        }
+        Empresa empresaExemplo = (Empresa) usuarioRepository.findByLogin("Empresa")
+                .orElseThrow(() -> new IllegalStateException("Empresa de exemplo nao encontrada para seed de automoveis"));
+
+        automovelRepository.save(new Automovel("ABC1D23", 2022, "Fiat", "Argo", empresaExemplo));
+        automovelRepository.save(new Automovel("DEF4E56", 2023, "Chevrolet", "Onix", empresaExemplo));
+        automovelRepository.save(new Automovel("GHI7F89", 2021, "Toyota", "Corolla", empresaExemplo));
+        log.info("Automoveis de exemplo cadastrados, propriedade de {}", empresaExemplo.getNomeInstituicao());
     }
 }
