@@ -1,8 +1,8 @@
 <script setup>
 import { computed, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import StatusPedido from '@/components/StatusPedido.vue'
-import { SITUACOES, meusPedidos, pedidosPendentes, rotuloModalidade } from '@/services/pedidoApi'
+import PedidoCard from '@/components/PedidoCard.vue'
+import { meusPedidos, pedidosPendentes } from '@/services/pedidoApi'
 import { authStore } from '@/store/auth'
 
 const route = useRoute()
@@ -37,10 +37,6 @@ watch(
   },
   { immediate: true },
 )
-
-function formatarData(iso) {
-  return iso ? new Date(iso).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }) : '—'
-}
 </script>
 
 <template>
@@ -71,35 +67,14 @@ function formatarData(iso) {
         </p>
 
         <ul v-else class="lista">
-          <li v-for="p in pedidos" :key="p.id" class="pedido" :class="{ destaque: String(p.id) === pedidoCriado }">
-            <div class="cabecalho-pedido">
-              <span class="numero">Pedido #{{ p.id }}</span>
-              <StatusPedido :situacao="p.situacao" />
-            </div>
-            <p class="automovel">
-              {{ p.automovel.marca }} {{ p.automovel.modelo }} {{ p.automovel.ano }}
-              <span class="placa">{{ p.automovel.placa }}</span>
-            </p>
-            <dl class="dados">
-              <div v-if="ehAgente">
-                <dt>Cliente</dt>
-                <dd>{{ p.nomeCliente }}</dd>
-              </div>
-              <div>
-                <dt>Modalidade</dt>
-                <dd>{{ rotuloModalidade(p.modalidade) }}</dd>
-              </div>
-              <div>
-                <dt>Criado em</dt>
-                <dd>{{ formatarData(p.dataCriacao) }}</dd>
-              </div>
-              <div v-if="p.dataAlteracao">
-                <dt>Alterado em</dt>
-                <dd>{{ formatarData(p.dataAlteracao) }}</dd>
-              </div>
-            </dl>
-            <p v-if="ehCliente" class="explicacao">{{ SITUACOES[p.situacao]?.descricao }}</p>
-          </li>
+          <PedidoCard
+            v-for="p in pedidos"
+            :key="p.id"
+            :pedido="p"
+            :papel="ehCliente ? 'CLIENTE' : 'AGENTE'"
+            :destaque="String(p.id) === pedidoCriado"
+            @atualizado="carregarPedidos"
+          />
         </ul>
       </template>
     </template>
@@ -146,65 +121,6 @@ function formatarData(iso) {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-}
-
-.pedido {
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  padding: 0.9rem 1.1rem;
-}
-
-.pedido.destaque {
-  border-color: hsla(160, 100%, 37%, 1);
-}
-
-.cabecalho-pedido {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-}
-
-.numero {
-  font-size: 0.85rem;
-  opacity: 0.75;
-}
-
-.automovel {
-  margin: 0.35rem 0 0.6rem;
-  font-weight: bold;
-  color: var(--color-heading);
-}
-
-.placa {
-  margin-left: 0.4rem;
-  padding: 0.05rem 0.4rem;
-  border: 1px solid var(--color-border);
-  border-radius: 3px;
-  font-family: monospace;
-  font-weight: normal;
-  font-size: 0.85rem;
-}
-
-.dados {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem 1.5rem;
-  font-size: 0.85rem;
-}
-
-.dados dt {
-  opacity: 0.7;
-}
-
-.dados dd {
-  margin: 0;
-}
-
-.explicacao {
-  margin-top: 0.6rem;
-  font-size: 0.8rem;
-  opacity: 0.75;
 }
 
 .aviso {

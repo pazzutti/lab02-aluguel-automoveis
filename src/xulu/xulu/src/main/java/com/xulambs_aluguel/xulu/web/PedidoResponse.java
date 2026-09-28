@@ -18,12 +18,14 @@ public record PedidoResponse(
         SituacaoPedido situacao,
         LocalDateTime dataCriacao,
         LocalDateTime dataAlteracao,
-        String nomeCliente
+        String nomeCliente,
+        ParecerResponse parecer
 ) {
 
     public static PedidoResponse from(Pedido pedido) {
+        ParecerResponse parecer = pedido.getParecer() == null ? null : ParecerResponse.from(pedido.getParecer());
         return new PedidoResponse(pedido.getId(), AutomovelResponse.from(pedido.getAutomovel()),
                 pedido.getModalidade(), pedido.getSituacao(), pedido.getDataCriacao(), pedido.getDataAlteracao(),
-                pedido.getCliente().getNome());
+                pedido.getCliente().getNome(), parecer);
     }
 }

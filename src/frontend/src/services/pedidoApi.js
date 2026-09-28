@@ -21,6 +21,12 @@ export const SITUACOES = {
   CANCELADO: { rotulo: 'Cancelado', descricao: 'Pedido cancelado pelo cliente.' },
 }
 
+// Espelha o enum ResultadoParecer do backend.
+export const RESULTADOS = {
+  FAVORAVEL: { rotulo: 'Favorável' },
+  DESFAVORAVEL: { rotulo: 'Desfavorável' },
+}
+
 async function tratarResposta(response) {
   if (response.status === 401) {
     throw new Error('Sessão expirada ou inexistente. Faça login antes de usar o sistema.')
@@ -49,4 +55,36 @@ export function meusPedidos() {
 
 export function pedidosPendentes() {
   return fetch(`${BASE_URL}/pendentes`).then(tratarResposta)
+}
+
+export function alterarPedido(id, pedido) {
+  return fetch(`${BASE_URL}/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(pedido),
+  }).then(tratarResposta)
+}
+
+export function cancelarPedido(id) {
+  return fetch(`${BASE_URL}/${id}/cancelar`, { method: 'POST' }).then(tratarResposta)
+}
+
+export function iniciarAnalise(id) {
+  return fetch(`${BASE_URL}/${id}/analise`, { method: 'POST' }).then(tratarResposta)
+}
+
+export function registrarParecer(id, parecer) {
+  return fetch(`${BASE_URL}/${id}/parecer`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(parecer),
+  }).then(tratarResposta)
+}
+
+export function decidirPedido(id, decisao) {
+  return fetch(`${BASE_URL}/${id}/decisao`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(decisao),
+  }).then(tratarResposta)
 }

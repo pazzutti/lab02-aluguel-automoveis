@@ -76,6 +76,22 @@ public class Automovel {
         return disponivel;
     }
 
+    /**
+     * Chamado ao criar um Contrato a partir de um Pedido aceito -- o automovel
+     * fica reservado mesmo enquanto um leasing ainda esta PENDENTE de credito.
+     */
+    public void marcarIndisponivel() {
+        this.disponivel = false;
+    }
+
+    /**
+     * Chamado por Empresa.registrarDevolucao() (via Locacao) quando o
+     * automovel volta para a frota.
+     */
+    public void marcarDisponivel() {
+        this.disponivel = true;
+    }
+
     public Usuario getProprietario() {
         return proprietario;
     }

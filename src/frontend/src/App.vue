@@ -20,9 +20,18 @@ async function sairEVoltar() {
     <nav>
       <template v-if="authStore.usuario?.tipo === 'CLIENTE'">
         <RouterLink to="/pedidos">Meus pedidos</RouterLink>
+        <RouterLink to="/contratos">Meus contratos</RouterLink>
         <RouterLink to="/perfil">Meu perfil</RouterLink>
       </template>
-      <RouterLink v-else-if="authStore.usuario" to="/pedidos">Pedidos pendentes</RouterLink>
+      <template v-else-if="authStore.usuario?.tipo === 'EMPRESA'">
+        <RouterLink to="/pedidos">Pedidos pendentes</RouterLink>
+        <RouterLink to="/contratos">Locações ativas</RouterLink>
+        <RouterLink to="/automoveis">Automóveis</RouterLink>
+      </template>
+      <template v-else-if="authStore.usuario?.tipo === 'BANCO'">
+        <RouterLink to="/pedidos">Pedidos pendentes</RouterLink>
+        <RouterLink to="/contratos">Leasings pendentes</RouterLink>
+      </template>
 
       <template v-if="authStore.usuario">
         <button type="button" class="link" @click="sairEVoltar">Sair</button>
